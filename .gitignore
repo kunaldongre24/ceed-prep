@@ -1,0 +1,19 @@
+node_modules/
+.next/
+out/
+.env
+.env.local
+*.tsbuildinfo
+next-env.d.ts
+
+# pipeline outputs
+data/
+reports/
+extract-cache/
+__pycache__/
+*.pyc
+
+.firebase/
+.firebase-debug.log
+.firebaserc
+
