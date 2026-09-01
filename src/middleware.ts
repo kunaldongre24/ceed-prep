@@ -5,7 +5,7 @@ const PUBLIC_AUTH = ["/auth/signin", "/auth/signup", "/favicon.ico", "/_next", "
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Admin routes use separate admin_auth cookie, not Supabase
+  // Admin routes use separate admin_auth cookie
   if (pathname.startsWith("/admin")) {
     if (pathname === "/admin/login") return NextResponse.next();
     const hasAdmin = request.cookies.get("admin_auth")?.value === "true";
@@ -13,15 +13,9 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const isPublic = PUBLIC_AUTH.some((p) => pathname.startsWith(p)) || pathname === "/";
-  const hasAuth = request.cookies.getAll().some((c) => c.name.startsWith("sb-") && c.name.includes("auth-token"));
-
+  // For Supabase auth, rely on client-side redirect (localStorage), not cookie
+  // Only handle root -> redirect to signin
   if (pathname === "/") {
-    if (hasAuth) return NextResponse.redirect(new URL("/test", request.url));
-    return NextResponse.redirect(new URL("/auth/signin", request.url));
-  }
-
-  if (!hasAuth && !isPublic) {
     return NextResponse.redirect(new URL("/auth/signin", request.url));
   }
 

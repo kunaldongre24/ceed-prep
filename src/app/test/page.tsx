@@ -2,12 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 export default function TestSetupPage() {
   const router = useRouter();
   const [questionCount, setQuestionCount] = useState(20);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) router.push("/auth/signin");
+    });
+  }, [router]);
 
   const startTest = async () => {
     if (questionCount < 1 || questionCount > 100) {
