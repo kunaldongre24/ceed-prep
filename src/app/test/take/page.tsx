@@ -202,11 +202,22 @@ function AnswerInput({
   answer?: UserAnswer;
   onChange: (a: UserAnswer) => void;
 }) {
+  // Fallback for image-based options where text extraction failed
+  const displayOptions =
+    question.options.length > 0
+      ? question.options
+      : (question.type === "single_choice" || question.type === "multiple_choice"
+          ? [{ key: "A", text: "Option A" }, { key: "B", text: "Option B" }, { key: "C", text: "Option C" }, { key: "D", text: "Option D" }]
+          : []);
+
   switch (question.type) {
     case "single_choice":
       return (
         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-          {question.options.map((o, idx) => (
+          {question.images.length > 0 && displayOptions.length === 4 && question.options.length === 0 && (
+            <p style={{ fontSize: "0.8rem", color: "#888", marginBottom: "0.25rem" }}>Options shown in image above — select your answer:</p>
+          )}
+          {displayOptions.map((o, idx) => (
             <label
               key={o.key}
               style={{
@@ -239,9 +250,9 @@ function AnswerInput({
       return (
         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
           <p style={{ fontSize: "0.8rem", color: "#888", marginBottom: "0.25rem" }}>
-            Select all that apply
+            Select all that apply {question.options.length === 0 && question.images.length > 0 ? "(see image)" : ""}
           </p>
-          {question.options.map((o) => {
+          {displayOptions.map((o) => {
             const selected = answer?.selectedOptions?.includes(o.key) ?? false;
             return (
               <label
