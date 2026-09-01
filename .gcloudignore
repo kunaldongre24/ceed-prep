@@ -10,3 +10,7 @@ reports/
 *.log
 .env.local
 python/__pycache__/
+*.pdf
+CEED*.pdf
+ceed*.pdf
+CEED*.PDF

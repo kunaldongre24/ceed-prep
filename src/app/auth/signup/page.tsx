@@ -125,7 +125,7 @@ export default function SignUpPage() {
         </button>
       </form>
       <p style={{ textAlign: "center", marginTop: "1.5rem", color: "#888" }}>
-        Already have an account? <a href="/auth/signin" onClick={(e) => e.preventDefault()}>Sign in</a>
+        Already have an account? <a href="/auth/signin" style={{ color: "#3b82f6" }}>Sign in</a>
       </p>
     </main>
   );

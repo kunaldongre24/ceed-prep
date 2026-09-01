@@ -66,6 +66,12 @@ export default function AdminPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
+    if (typeof window !== "undefined" && localStorage.getItem("adminAuth") !== "true") {
+      window.location.href = "/admin/login";
+    }
+  }, []);
+
+  useEffect(() => {
     fetch("/api/exams")
       .then((r) => r.json())
       .then((d) => setExams(d.exams ?? []))

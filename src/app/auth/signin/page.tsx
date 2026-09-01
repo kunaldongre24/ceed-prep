@@ -95,7 +95,7 @@ export default function SignInPage() {
         </button>
       </form>
       <p style={{ textAlign: "center", marginTop: "1.5rem", color: "#888" }}>
-        Don't have an account? <a href="/auth/signup" onClick={(e) => e.preventDefault()}>Sign up</a>
+        Don't have an account? <a href="/auth/signup" style={{ color: "#3b82f6" }}>Sign up</a>
       </p>
     </main>
   );
