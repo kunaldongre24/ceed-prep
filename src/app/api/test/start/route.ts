@@ -45,26 +45,39 @@ export async function POST(req: Request) {
     );
   }
 
-  const actualCount = Math.min(questionCount, count);
-
-  // Fetch all approved question IDs across all exams
+  // Fetch all approved questions with options to filter out choice Qs without options
   const { data: allQuestions, error: fetchErr } = await supabase
     .from("questions")
-    .select("id")
+    .select("id, question_type, question_options (id), question_images (id)")
     .eq("section", "A")
     .eq("status", "approved")
     .eq("is_dropped", false);
 
   if (fetchErr) return NextResponse.json({ error: fetchErr.message }, { status: 500 });
 
+  // Keep only usable questions: choice types must have options or option-images, others always usable
+  const usable = (allQuestions ?? []).filter((q: any) => {
+    if (q.question_type === "single_choice" || q.question_type === "multiple_choice") {
+      const hasTextOpts = (q.question_options?.length ?? 0) > 0;
+      const hasImgs = (q.question_images?.length ?? 0) > 0;
+      return hasTextOpts || hasImgs;
+    }
+    return true;
+  });
+
+  if (usable.length === 0) {
+    return NextResponse.json({ error: "No usable questions (with options/images) available" }, { status: 404 });
+  }
+
+  const actualUsableCount = Math.min(questionCount, usable.length);
   // Random shuffle and pick
-  const shuffled = (allQuestions ?? []).sort(() => Math.random() - 0.5);
-  const selected = shuffled.slice(0, actualCount);
+  const shuffled = usable.sort(() => Math.random() - 0.5);
+  const selected = shuffled.slice(0, actualUsableCount);
 
   // Create session (no exam_id linkage — global question bank)
   const { data: session, error: sessErr } = await supabase
     .from("test_sessions")
-    .insert({ question_count: actualCount })
+    .insert({ question_count: actualUsableCount })
     .select("id")
     .single();
 
@@ -124,7 +137,7 @@ export async function POST(req: Request) {
 
   return NextResponse.json({
     sessionId: session.id,
-    questionCount: actualCount,
+    questionCount: actualUsableCount,
     questions: sanitized,
   });
 }

@@ -87,6 +87,11 @@ function TestTake() {
 
   const q = questions[currentIdx];
   const answered = Object.keys(answers).length;
+  const [loadedImgs, setLoadedImgs] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    setLoadedImgs({});
+  }, [currentIdx]);
 
   return (
     <main style={{ maxWidth: 800, margin: "0 auto", padding: "2rem 1.5rem" }}>
@@ -129,14 +134,22 @@ function TestTake() {
 
       {q.images.length > 0 && (
         <div style={{ display: "flex", gap: "0.75rem", marginBottom: "1.25rem", flexWrap: "wrap" }}>
-          {q.images.map((img) => (
-            <img
-              key={img.imageIndex}
-              src={img.url}
-              alt={`Figure ${img.imageIndex + 1}`}
-              style={{ maxWidth: 500, maxHeight: 400, border: "1px solid #333", borderRadius: 4 }}
-            />
-          ))}
+          {q.images.map((img) => {
+            const key = `${q.id}-${img.imageIndex}`;
+            const loaded = loadedImgs[key];
+            return (
+              <div key={key} style={{ position: "relative", minWidth: 200, minHeight: 150, maxWidth: 500, maxHeight: 400, border: "1px solid #333", borderRadius: 4, overflow: "hidden", background: "#111", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {!loaded && <div style={{ position: "absolute", color: "#888", fontSize: "0.85rem" }}>Loading image...</div>}
+                <img
+                  src={img.url}
+                  alt={`Figure ${img.imageIndex + 1}`}
+                  onLoad={() => setLoadedImgs((prev) => ({ ...prev, [key]: true }))}
+                  onError={() => setLoadedImgs((prev) => ({ ...prev, [key]: true }))}
+                  style={{ maxWidth: "100%", maxHeight: 400, opacity: loaded ? 1 : 0, transition: "opacity 0.2s" }}
+                />
+              </div>
+            );
+          })}
         </div>
       )}
 
