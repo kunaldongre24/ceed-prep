@@ -43,7 +43,7 @@ export default function SignUpPage() {
       console.error("Profile creation error:", profileError);
     }
 
-    // 3. Sign in automatically and redirect to test
+    // 3. Sign in automatically and redirect to home
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -51,7 +51,9 @@ export default function SignUpPage() {
     if (signInError) {
       setError(signInError.message);
     } else {
-      router.push("/test");
+      document.cookie = "ceed_auth=1; path=/; max-age=86400; SameSite=Lax";
+      localStorage.setItem("ceed_username", username);
+      router.push("/");
     }
     setLoading(false);
   };

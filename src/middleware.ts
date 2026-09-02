@@ -13,10 +13,17 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // For Supabase auth, rely on client-side redirect (localStorage), not cookie
-  // Only handle root -> redirect to signin
+  const hasCeedAuth = request.cookies.get("ceed_auth")?.value === "1";
+  const hasSupabaseAuth = request.cookies.getAll().some((c) => c.name.startsWith("sb-") && c.name.includes("auth-token"));
+  const isLoggedIn = hasCeedAuth || hasSupabaseAuth;
+
   if (pathname === "/") {
+    if (isLoggedIn) return NextResponse.next();
     return NextResponse.redirect(new URL("/auth/signin", request.url));
+  }
+
+  if (isLoggedIn && (pathname.startsWith("/auth/signin") || pathname.startsWith("/auth/signup"))) {
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();

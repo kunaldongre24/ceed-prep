@@ -20,8 +20,8 @@ export default function SignInPage() {
       setLoading(false);
       return;
     }
-    // No profile check needed - just go to test
-    router.push("/test");
+    document.cookie = "ceed_auth=1; path=/; max-age=86400; SameSite=Lax";
+    router.push("/");
     setLoading(false);
   };
 
