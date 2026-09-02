@@ -44,6 +44,12 @@ function TestTake() {
     setQuestions(data.questions);
   }, [sessionId, router]);
 
+  const [loadedImgs, setLoadedImgs] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    setLoadedImgs({});
+  }, [currentIdx]);
+
   const setAnswer = useCallback(
     (questionId: string, answer: UserAnswer) => {
       setAnswers((prev) => ({ ...prev, [questionId]: answer }));
@@ -87,11 +93,6 @@ function TestTake() {
 
   const q = questions[currentIdx];
   const answered = Object.keys(answers).length;
-  const [loadedImgs, setLoadedImgs] = useState<Record<string, boolean>>({});
-
-  useEffect(() => {
-    setLoadedImgs({});
-  }, [currentIdx]);
 
   return (
     <main style={{ maxWidth: 800, margin: "0 auto", padding: "2rem 1.5rem" }}>

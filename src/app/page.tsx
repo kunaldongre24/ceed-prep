@@ -9,19 +9,26 @@ export default function HomePage() {
           <p style={{ color: "#94a3b8", fontSize: "1.1rem" }}>Master Design Entrance — Practice. Compete. Win.</p>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginBottom: "2rem" }}>
-          <Link href="/test" style={{ background: "linear-gradient(135deg,#1e40af,#3b82f6)", borderRadius: 16, padding: "2rem", textAlign: "center", boxShadow: "0 10px 30px rgba(59,130,246,0.3)", transform: "translateY(0)", transition: "transform 0.2s" }}>
-            <div style={{ fontSize: "2.5rem" }}>🎯</div>
-            <h2 style={{ fontSize: "1.25rem", fontWeight: 800, margin: "0.5rem 0", color: "#fff" }}>Solo Practice</h2>
-            <p style={{ color: "#dbeafe", fontSize: "0.9rem" }}>Random Qs from all years · Instant scoring</p>
-            <div style={{ marginTop: "1rem", display: "inline-block", padding: "0.5rem 1.2rem", background: "#fff", color: "#1e40af", borderRadius: 20, fontWeight: 700, fontSize: "0.85rem" }}>Start Test →</div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem", marginBottom: "2rem" }}>
+          <Link href="/test" style={{ background: "linear-gradient(135deg,#1e40af,#3b82f6)", borderRadius: 16, padding: "1.5rem", textAlign: "center", boxShadow: "0 10px 30px rgba(59,130,246,0.3)" }}>
+            <div style={{ fontSize: "2rem" }}>🎯</div>
+            <h2 style={{ fontSize: "1.1rem", fontWeight: 800, margin: "0.5rem 0", color: "#fff" }}>Practice</h2>
+            <p style={{ color: "#dbeafe", fontSize: "0.85rem" }}>Random Qs · Instant scoring</p>
+            <div style={{ marginTop: "0.75rem", display: "inline-block", padding: "0.4rem 1rem", background: "#fff", color: "#1e40af", borderRadius: 20, fontWeight: 700, fontSize: "0.8rem" }}>Start →</div>
           </Link>
 
-          <Link href="/rooms" style={{ background: "linear-gradient(135deg,#7e22ce,#ec4899)", borderRadius: 16, padding: "2rem", textAlign: "center", boxShadow: "0 10px 30px rgba(236,72,153,0.3)" }}>
-            <div style={{ fontSize: "2.5rem" }}>⚔️</div>
-            <h2 style={{ fontSize: "1.25rem", fontWeight: 800, margin: "0.5rem 0", color: "#fff" }}>Battle Room</h2>
-            <p style={{ color: "#fce7f3", fontSize: "0.9rem" }}>Create or join · Live timer · Leaderboard</p>
-            <div style={{ marginTop: "1rem", display: "inline-block", padding: "0.5rem 1.2rem", background: "#fff", color: "#7e22ce", borderRadius: 20, fontWeight: 700, fontSize: "0.85rem" }}>Enter Arena →</div>
+          <Link href="/rooms?create=1" style={{ background: "linear-gradient(135deg,#059669,#10b981)", borderRadius: 16, padding: "1.5rem", textAlign: "center", boxShadow: "0 10px 30px rgba(16,185,129,0.3)" }}>
+            <div style={{ fontSize: "2rem" }}>➕</div>
+            <h2 style={{ fontSize: "1.1rem", fontWeight: 800, margin: "0.5rem 0", color: "#fff" }}>Create Room</h2>
+            <p style={{ color: "#d1fae5", fontSize: "0.85rem" }}>Host a battle · Share code</p>
+            <div style={{ marginTop: "0.75rem", display: "inline-block", padding: "0.4rem 1rem", background: "#fff", color: "#059669", borderRadius: 20, fontWeight: 700, fontSize: "0.8rem" }}>Create →</div>
+          </Link>
+
+          <Link href="/rooms?join=1" style={{ background: "linear-gradient(135deg,#7e22ce,#ec4899)", borderRadius: 16, padding: "1.5rem", textAlign: "center", boxShadow: "0 10px 30px rgba(236,72,153,0.3)" }}>
+            <div style={{ fontSize: "2rem" }}>🚪</div>
+            <h2 style={{ fontSize: "1.1rem", fontWeight: 800, margin: "0.5rem 0", color: "#fff" }}>Join Room</h2>
+            <p style={{ color: "#fce7f3", fontSize: "0.85rem" }}>Enter code · Compete live</p>
+            <div style={{ marginTop: "0.75rem", display: "inline-block", padding: "0.4rem 1rem", background: "#fff", color: "#7e22ce", borderRadius: 20, fontWeight: 700, fontSize: "0.8rem" }}>Join →</div>
           </Link>
         </div>
 
