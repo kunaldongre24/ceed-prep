@@ -17,6 +17,16 @@ export function middleware(request: NextRequest) {
   const hasSupabaseAuth = request.cookies.getAll().some((c) => c.name.startsWith("sb-") && c.name.includes("auth-token"));
   const isLoggedIn = hasCeedAuth || hasSupabaseAuth;
 
+  // Protected user routes — registered users only
+  const isProtected =
+    pathname === "/test" ||
+    pathname.startsWith("/test") ||
+    pathname === "/rooms" ||
+    pathname.startsWith("/rooms");
+  if (!isLoggedIn && isProtected) {
+    return NextResponse.redirect(new URL("/auth/signin", request.url));
+  }
+
   if (pathname === "/") {
     if (isLoggedIn) return NextResponse.next();
     return NextResponse.redirect(new URL("/auth/signin", request.url));

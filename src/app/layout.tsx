@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata = {
   title: "CEED Prep — Practice & Battle",
-  description: "CEED examination practice platform — 290+ questions, solo & realtime multiplayer",
+  description: "CEED examination practice platform — 370+ questions, solo & realtime multiplayer",
 };
 
 function Header() {
@@ -13,7 +13,7 @@ function Header() {
         <Link href="/" className="flex items-center gap-2 font-black tracking-tight">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg gradient-primary text-white text-sm">C</span>
           <span className="hidden sm:inline">CEED PREP</span>
-          <span className="ml-2 hidden rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground sm:inline">7 years · 290 Qs</span>
+          <span className="ml-2 hidden rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground sm:inline">8 years · 373 Qs</span>
         </Link>
         <nav className="flex items-center gap-1 text-sm">
           <Link href="/test" className="rounded-md px-3 py-1.5 hover:bg-accent hover:text-accent-foreground transition-colors">Practice</Link>

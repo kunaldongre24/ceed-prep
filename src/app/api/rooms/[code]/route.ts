@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-function db() { return createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false, autoRefreshToken: false } }); }
+import { db } from "@/lib/server/auth";
 export async function GET(_req: Request, { params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
   const supabase = db();
-  const { data: room, error } = await supabase.from("rooms").select("id, code, host_username, question_count, timer_seconds, status, question_ids, created_at, started_at").eq("code", code.toUpperCase()).single();
+  const { data: room, error } = await supabase.from("rooms").select("id, code, host_username, question_count, timer_seconds, status, question_ids, created_at, started_at, ended_at").eq("code", code.toUpperCase()).single();
   if (error || !room) return NextResponse.json({ error: "Room not found" }, { status: 404 });
-  const { data: participants } = await supabase.from("room_participants").select("username, score, joined_at").eq("room_id", room.id).order("joined_at");
+  const { data: participants } = await supabase.from("room_participants").select("username, score, answers, timings, completed, joined_at").eq("room_id", room.id).order("joined_at");
   let questions: any[] = [];
   if (room.question_ids?.length) {
     const { data: qs } = await supabase.from("questions").select("id, question_number, question_type, question_text, sub_section, question_options(option_key, option_text, option_order), question_images(image_index, url, storage_path)").in("id", room.question_ids);

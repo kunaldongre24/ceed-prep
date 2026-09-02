@@ -1,8 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+
+interface ResultItem {
+  questionId: string;
+  questionNumber: number;
+  questionType: string;
+  questionText: string;
+  subSection?: string;
+  options: { key: string; text: string }[];
+  images: { imageIndex: number; url: string }[];
+  userAnswer: Record<string, unknown> | null;
+  correctAnswer: Record<string, unknown> | null;
+  result: "correct" | "incorrect" | "unattempted";
+  timeSeconds: number;
+}
 
 interface Result {
   sessionId: string;
@@ -12,18 +28,9 @@ interface Result {
   incorrect: number;
   unattempted: number;
   accuracy: number;
-  results: {
-    questionId: string;
-    questionNumber: number;
-    questionType: string;
-    questionText: string;
-    subSection?: string;
-    options: { key: string; text: string }[];
-    images: { imageIndex: number; url: string }[];
-    userAnswer: Record<string, unknown> | null;
-    correctAnswer: Record<string, unknown> | null;
-    result: "correct" | "incorrect" | "unattempted";
-  }[];
+  totalTimeSeconds: number;
+  avgTimeSeconds: number;
+  results: ResultItem[];
 }
 
 function TestResult() {
@@ -31,189 +38,191 @@ function TestResult() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("sessionId");
   const [data, setData] = useState<Result | null>(null);
-  const [showReview, setShowReview] = useState(false);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    if (!sessionId) {
-      router.push("/test");
-      return;
-    }
-    const stored = sessionStorage.getItem(`result-${sessionId}`);
-    if (!stored) {
-      router.push("/test");
-      return;
-    }
-    setData(JSON.parse(stored));
+    if (!sessionId) { router.push("/test"); return; }
+    (async () => {
+      // try sessionStorage first
+      const cached = sessionStorage.getItem(`result-${sessionId}`);
+      if (cached) { try { setData(JSON.parse(cached)); } catch { /* ignore */ } }
+      // fetch from server for accuracy
+      try {
+        const res = await fetch(`/api/test/result?sessionId=${sessionId}`);
+        if (res.ok) setData(await res.json());
+      } catch { /* rely on cache */ }
+    })();
   }, [sessionId, router]);
 
   if (!data) {
     return (
-      <main style={{ maxWidth: 800, margin: "0 auto", padding: "3rem 1.5rem" }}>
-        <p style={{ color: "#888" }}>Loading results...</p>
-      </main>
+      <div className="flex min-h-[calc(100vh-7rem)] items-center justify-center">
+        <p className="text-muted-foreground">Loading results...</p>
+      </div>
     );
   }
 
+  const fastedQ = data.results.reduce((best, r) => best.timeSeconds <= r.timeSeconds ? best : r, data.results[0]);
+  const slowestQ = data.results.reduce((worst, r) => worst.timeSeconds >= r.timeSeconds ? worst : r, data.results[0]);
+  const maxTime = Math.max(...data.results.map((r) => r.timeSeconds), 1);
+
+  const toggle = (id: string) => setExpanded((prev) => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
+
   return (
-    <main style={{ maxWidth: 800, margin: "0 auto", padding: "2rem 1.5rem" }}>
-      <h1 style={{ fontSize: "1.75rem", fontWeight: 700, marginBottom: "1.5rem" }}>
-        Test Results
-      </h1>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
-          gap: "1rem",
-          marginBottom: "2rem",
-        }}
-      >
-        {[
-          { label: "Score", value: `${data.score}/${data.total}`, color: "#3b82f6" },
-          { label: "Correct", value: data.correct, color: "#22c55e" },
-          { label: "Incorrect", value: data.incorrect, color: "#ef4444" },
-          { label: "Unattempted", value: data.unattempted, color: "#888" },
-        ].map((s) => (
-          <div
-            key={s.label}
-            style={{
-              padding: "1rem",
-              border: "1px solid #333",
-              borderRadius: 8,
-              textAlign: "center",
-            }}
-          >
-            <div style={{ fontSize: "1.5rem", fontWeight: 700, color: s.color }}>
-              {s.value}
-            </div>
-            <div style={{ fontSize: "0.8rem", color: "#888" }}>{s.label}</div>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ marginBottom: "1.5rem" }}>
-        <span style={{ color: "#aaa" }}>Accuracy: </span>
-        <span style={{ fontWeight: 700, fontSize: "1.1rem" }}>{data.accuracy}%</span>
-      </div>
-
-      <button
-        onClick={() => setShowReview(!showReview)}
-        style={{
-          padding: "0.5rem 1.25rem",
-          background: "#333",
-          color: "#fff",
-          border: "none",
-          borderRadius: 4,
-          marginBottom: "1.5rem",
-        }}
-      >
-        {showReview ? "Hide Review" : "Show Detailed Review"}
-      </button>
-
-      {showReview && (
-        <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-          {data.results.map((r, i) => (
-            <div
-              key={r.questionId}
-              style={{
-                border: "1px solid #333",
-                borderRadius: 8,
-                padding: "1rem 1.25rem",
-                background: r.result === "correct" ? "#0a1a0a" : r.result === "incorrect" ? "#1a0a0a" : "#111",
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-                <span style={{ fontWeight: 600 }}>
-                  Q{i + 1} (Paper Q{r.questionNumber})
-                </span>
-                <span
-                  style={{
-                    fontSize: "0.75rem",
-                    padding: "2px 8px",
-                    borderRadius: 4,
-                    background: r.result === "correct" ? "#166534" : r.result === "incorrect" ? "#991b1b" : "#555",
-                    color: "#fff",
-                  }}
-                >
-                  {r.result}
-                </span>
+    <div className="min-h-[calc(100vh-7rem)] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black p-4">
+      <div className="mx-auto max-w-4xl">
+        {/* hero */}
+        <Card className="mb-6 border-0 bg-gradient-to-br from-slate-800 to-slate-900 text-center">
+          <CardHeader>
+            <CardTitle className="text-3xl font-black">Test Results</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {[
+              { label: "Score", value: `${data.score}/${data.total}`, color: "text-blue-400" },
+              { label: "Accuracy", value: `${data.accuracy}%`, color: data.accuracy >= 70 ? "text-emerald-400" : data.accuracy >= 40 ? "text-amber-400" : "text-red-400" },
+              { label: "Total Time", value: formatTime(data.totalTimeSeconds), color: "text-violet-400" },
+              { label: "Avg / Question", value: formatTime(data.avgTimeSeconds), color: "text-cyan-400" },
+            ].map((s) => (
+              <div key={s.label} className="text-center">
+                <div className={`text-3xl font-black ${s.color}`}>{s.value}</div>
+                <div className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">{s.label}</div>
               </div>
+            ))}
+          </CardContent>
+        </Card>
 
-              <p style={{ marginBottom: "0.75rem", lineHeight: 1.6 }}>{r.questionText}</p>
+        {/* breakdown cards */}
+        <div className="mb-6 grid grid-cols-3 gap-3">
+          <Card className="text-center">
+            <CardContent className="pt-5 pb-4">
+              <div className="text-2xl font-bold text-emerald-400">{data.correct}</div>
+              <div className="text-xs uppercase text-muted-foreground">Correct</div>
+            </CardContent>
+          </Card>
+          <Card className="text-center">
+            <CardContent className="pt-5 pb-4">
+              <div className="text-2xl font-bold text-red-400">{data.incorrect}</div>
+              <div className="text-xs uppercase text-muted-foreground">Incorrect</div>
+            </CardContent>
+          </Card>
+          <Card className="text-center">
+            <CardContent className="pt-5 pb-4">
+              <div className="text-2xl font-bold text-muted-foreground">{data.unattempted}</div>
+              <div className="text-xs uppercase text-muted-foreground">Unattempted</div>
+            </CardContent>
+          </Card>
+        </div>
 
-              {r.images.length > 0 && (
-                <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.75rem", flexWrap: "wrap" }}>
-                  {r.images.map((img) => (
-                    <img
-                      key={img.imageIndex}
-                      src={img.url}
-                      alt={`Figure ${img.imageIndex + 1}`}
-                      style={{ maxWidth: 400, maxHeight: 300, border: "1px solid #333", borderRadius: 4 }}
-                    />
-                  ))}
-                </div>
-              )}
+        {/* time insights */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>⏱ Time Analysis</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-4 sm:grid-cols-3 text-sm">
+            <div className="rounded-lg bg-muted/30 p-4">
+              <div className="text-muted-foreground text-xs uppercase tracking-wider mb-1">Fastest</div>
+              <div className="font-semibold text-emerald-400">Q{fastedQ.questionNumber}</div>
+              <div className="text-xs text-muted-foreground">{formatTime(fastedQ.timeSeconds)}</div>
+            </div>
+            <div className="rounded-lg bg-muted/30 p-4">
+              <div className="text-muted-foreground text-xs uppercase tracking-wider mb-1">Slowest</div>
+              <div className="font-semibold text-amber-400">Q{slowestQ.questionNumber}</div>
+              <div className="text-xs text-muted-foreground">{formatTime(slowestQ.timeSeconds)}</div>
+            </div>
+            <div className="rounded-lg bg-muted/30 p-4">
+              <div className="text-muted-foreground text-xs uppercase tracking-wider mb-1">Total Time</div>
+              <div className="font-semibold text-blue-400">{formatTime(data.totalTimeSeconds)}</div>
+              <div className="text-xs text-muted-foreground">for {data.total} questions</div>
+            </div>
+          </CardContent>
+        </Card>
 
-              {r.options.length > 0 && (
-                <div style={{ marginBottom: "0.5rem", marginLeft: "1rem" }}>
-                  {r.options.map((o) => (
-                    <div key={o.key} style={{ fontSize: "0.9rem" }}>
-                      {o.key}. {o.text}
+        {/* per-question breakdown */}
+        <h2 className="mb-3 text-lg font-bold">Question Breakdown</h2>
+        <div className="space-y-3 mb-10">
+          {data.results.map((r, i) => {
+            const isOpen = expanded.has(r.questionId);
+            const timeRatio = r.timeSeconds / maxTime;
+            const userStr = formatUserAnswer(r);
+            const correctStr = formatCorrectAnswer(r.correctAnswer);
+            return (
+              <div
+                key={r.questionId}
+                onClick={() => toggle(r.questionId)}
+                className="cursor-pointer rounded-xl border border-border bg-card/60 p-4 transition-colors hover:border-primary/40"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Badge variant={r.result === "correct" ? "default" : r.result === "incorrect" ? "destructive" : "secondary"}>
+                      {r.result}
+                    </Badge>
+                    <span className="text-sm font-semibold">Q{i + 1} <span className="text-muted-foreground">(Paper Q{r.questionNumber})</span></span>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <span className="tabular-nums font-medium">{formatTime(r.timeSeconds)}</span>
+                    {/* time bar */}
+                    <div className="hidden sm:block h-1.5 w-24 rounded-full bg-secondary overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${r.result === "correct" ? "bg-emerald-500" : r.result === "incorrect" ? "bg-red-500" : "bg-muted-foreground/40"}`}
+                        style={{ width: `${Math.max(timeRatio * 100, 4)}%` }}
+                      />
                     </div>
-                  ))}
+                    <span>{isOpen ? "▾" : "▸"}</span>
+                  </div>
                 </div>
-              )}
 
-              <div style={{ fontSize: "0.875rem", marginTop: "0.5rem" }}>
-                <div>
-                  <span style={{ color: "#888" }}>Your answer: </span>
-                  <span style={{ color: r.result === "correct" ? "#22c55e" : "#ef4444" }}>
-                    {formatUserAnswer(r)}
-                  </span>
-                </div>
-                {r.result !== "correct" && (
-                  <div>
-                    <span style={{ color: "#888" }}>Correct answer: </span>
-                    <span style={{ color: "#22c55e" }}>
-                      {formatCorrectAnswer(r.correctAnswer)}
-                    </span>
+                {isOpen && (
+                  <div className="mt-4 border-t border-border pt-4 space-y-3">
+                    {r.questionType === "multiple_choice" && <p className="text-xs text-muted-foreground italic">Select all that apply.</p>}
+                    <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{r.questionText}</p>
+
+                    {r.images.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {r.images.map((img) => (
+                          <img key={img.imageIndex} src={img.url} alt="" className="max-w-xs max-h-48 rounded-md border border-border" />
+                        ))}
+                      </div>
+                    )}
+
+                    {r.options.length > 0 && (
+                      <div className="ml-2 space-y-1 text-sm text-muted-foreground">
+                        {r.options.map((o) => <div key={o.key}><strong>{o.key}.</strong> {o.text}</div>)}
+                      </div>
+                    )}
+
+                    <div className="space-y-1 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">Your answer: </span>
+                        <span className={r.result === "correct" ? "text-emerald-400 font-semibold" : "text-red-400"}>{userStr}</span>
+                      </div>
+                      {r.result !== "correct" && (
+                        <div>
+                          <span className="text-muted-foreground">Correct answer: </span>
+                          <span className="text-emerald-400 font-semibold">{correctStr}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
-      )}
 
-      <div style={{ marginTop: "2rem" }}>
-        <button
-          onClick={() => router.push("/test")}
-          style={{
-            padding: "0.5rem 1.25rem",
-            background: "#3b82f6",
-            color: "#fff",
-            border: "none",
-            borderRadius: 4,
-          }}
-        >
-          Take Another Test
-        </button>
-        <a
-          href="/test/history"
-          style={{
-            padding: "0.5rem 1.25rem",
-            background: "#8b5cf6",
-            color: "#fff",
-            border: "none",
-            borderRadius: 4,
-            marginLeft: "0.5rem",
-          }}
-        >
-          History
-        </a>
+        <div className="flex justify-center gap-3 pb-10">
+          <Button onClick={() => router.push("/test")} className="gradient-primary text-white">Take Another Test</Button>
+          <Button variant="outline" onClick={() => router.push("/test/history")}>History</Button>
+        </div>
       </div>
-    </main>
+    </div>
   );
+}
+
+function formatTime(s: number): string {
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return sec > 0 ? `${m}m ${sec}s` : `${m}m`;
 }
 
 function formatUserAnswer(r: { result: string; userAnswer: Record<string, unknown> | null; questionType: string }): string {
@@ -246,7 +255,7 @@ function formatCorrectAnswer(ca: Record<string, unknown> | null): string {
 
 export default function TestResultPage() {
   return (
-    <Suspense fallback={<main style={{ maxWidth: 800, margin: "0 auto", padding: "3rem 1.5rem" }}><p style={{ color: "#888" }}>Loading...</p></main>}>
+    <Suspense fallback={<div className="flex min-h-[calc(100vh-7rem)] items-center justify-center"><p className="text-muted-foreground">Loading...</p></div>}>
       <TestResult />
     </Suspense>
   );

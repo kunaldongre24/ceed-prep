@@ -1,22 +1,18 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-function db() {
-  return createClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false, autoRefreshToken: false } }
-  );
-}
+import { getAuthUser, db } from "@/lib/server/auth";
 
 /**
  * POST /api/test/start
  * Body: { questionCount: number }
  *
- * Creates a test session, randomly selects approved Section A questions
- * from ALL exams, and returns the session ID + sanitized questions (no answers).
+ * Creates a test session (60s per question) for the authenticated user,
+ * randomly selects approved Section A questions from ALL exams, and returns
+ * the session ID + sanitized questions (no answers) + timerSeconds.
  */
 export async function POST(req: Request) {
+  const auth = await getAuthUser(req);
+  if (!auth) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+
   const body = await req.json();
   const { questionCount } = body as { questionCount?: number };
 
@@ -70,14 +66,20 @@ export async function POST(req: Request) {
   }
 
   const actualUsableCount = Math.min(questionCount, usable.length);
+  const timerSeconds = actualUsableCount * 60;
   // Random shuffle and pick
   const shuffled = usable.sort(() => Math.random() - 0.5);
   const selected = shuffled.slice(0, actualUsableCount);
 
-  // Create session (no exam_id linkage — global question bank)
+  // Create session for this user (60s per question)
   const { data: session, error: sessErr } = await supabase
     .from("test_sessions")
-    .insert({ question_count: actualUsableCount })
+    .insert({
+      user_id: auth.user.id,
+      question_count: actualUsableCount,
+      timer_seconds: timerSeconds,
+      started_at: new Date().toISOString(),
+    })
     .select("id")
     .single();
 
@@ -138,6 +140,7 @@ export async function POST(req: Request) {
   return NextResponse.json({
     sessionId: session.id,
     questionCount: actualUsableCount,
+    timerSeconds,
     questions: sanitized,
   });
 }

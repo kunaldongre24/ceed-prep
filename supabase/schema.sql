@@ -162,6 +162,62 @@ create policy "session own answers" on test_answers
     select user_id from test_sessions where id = test_session_id limit 1
   ));
 
+-- ============ battle rooms ============
+create table if not exists rooms (
+  id uuid primary key default gen_random_uuid(),
+  code text not null unique,
+  host_id uuid references auth.users(id) on delete cascade,
+  host_username text,
+  question_count integer not null default 10,
+  status text not null default 'waiting',
+  question_ids uuid[],
+  timer_seconds integer not null default 600,
+  created_at timestamptz not null default now(),
+  started_at timestamptz,
+  ended_at timestamptz
+);
+
+alter table rooms enable row level security;
+
+drop policy if exists "public read rooms" on rooms;
+create policy "public read rooms" on rooms
+  for select using (true);
+
+-- ============ room participants ============
+create table if not exists room_participants (
+  id uuid primary key default gen_random_uuid(),
+  room_id uuid not null references rooms(id) on delete cascade,
+  user_id uuid references auth.users(id) on delete cascade,
+  username text not null,
+  score integer default 0,
+  answers jsonb,
+  timings jsonb,
+  completed boolean not null default false,
+  current_index integer,
+  time_remaining integer,
+  marked_for_review jsonb,
+  joined_at timestamptz not null default now(),
+  unique (room_id, user_id)
+);
+
+alter table room_participants enable row level security;
+
+drop policy if exists "public read participants" on room_participants;
+create policy "public read participants" on room_participants
+  for select using (true);
+
+-- ============ migration (idempotent) ============
+alter table test_sessions add column if not exists user_id uuid references auth.users(id) on delete cascade;
+alter table test_sessions add column if not exists timer_seconds integer;
+alter table test_sessions add column if not exists started_at timestamptz;
+alter table test_answers add column if not exists time_spent_ms integer;
+alter table room_participants add column if not exists user_id uuid references auth.users(id) on delete cascade;
+alter table room_participants add column if not exists timings jsonb;
+alter table room_participants add column if not exists completed boolean not null default false;
+alter table room_participants add column if not exists current_index integer;
+alter table room_participants add column if not exists time_remaining integer;
+alter table room_participants add column if not exists marked_for_review jsonb;
+
 -- ============ Row Level Security ============
 -- Note: the service_role key bypasses RLS and is used by server-side scripts
 -- (process-papers, db-init, API routes via the service role client).
