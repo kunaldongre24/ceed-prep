@@ -16,8 +16,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ code: s
       images: (q.question_images ?? []).sort((a:any,b:any)=>a.image_index-b.image_index).map((i:any)=>({imageIndex:i.image_index, url:i.url || `/api/image?path=${encodeURIComponent(i.storage_path)}`}))
     }));
     // keep order as in question_ids
-    const order = new Map(room.question_ids.map((id:string,i:number)=>[id,i]));
-    questions.sort((a,b)=>(order.get(a.id)??0)-(order.get(b.id)??0));
+    const order = new Map<string, number>(room.question_ids.map((id:string,i:number)=>[id,i] as const));
+    questions.sort((a:any,b:any)=> (order.get(a.id) as number ?? 0) - (order.get(b.id) as number ?? 0));
   }
   return NextResponse.json({ room, participants, questions: room.status === "waiting" ? [] : questions });
 }
