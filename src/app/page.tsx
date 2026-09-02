@@ -1,57 +1,109 @@
 "use client";
 import Link from "next/link";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+
 export default function HomePage() {
   return (
-    <main style={{ minHeight: "100vh", background: "radial-gradient(ellipse at top, #1e293b 0%, #0f172a 50%, #020617 100%)", color: "#fff" }}>
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: "3rem 1.5rem" }}>
-        <div style={{ textAlign: "center", marginBottom: "3rem" }}>
-          <h1 style={{ fontSize: "3rem", fontWeight: 900, background: "linear-gradient(90deg,#3b82f6,#8b5cf6,#ec4899)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", marginBottom: "0.5rem" }}>CEED PREP</h1>
-          <p style={{ color: "#94a3b8", fontSize: "1.1rem" }}>Master Design Entrance — Practice. Compete. Win.</p>
+    <div className="min-h-[calc(100vh-7rem)] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black">
+      <div className="mx-auto max-w-5xl px-4 py-10">
+        {/* Hero */}
+        <div className="text-center mb-10">
+          <Badge variant="secondary" className="mb-3">Production Ready · Asia-South1 · Realtime</Badge>
+          <h1 className="text-4xl sm:text-5xl font-black tracking-tight bg-gradient-to-r from-blue-500 via-violet-500 to-pink-500 bg-clip-text text-transparent">CEED PREP</h1>
+          <p className="mt-3 text-lg text-muted-foreground max-w-2xl mx-auto">Master Design Entrance — 290+ curated questions from 7 years. Practice solo or battle friends live.</p>
+          <div className="mt-4 flex flex-wrap justify-center gap-2 text-xs">
+            <Badge variant="outline">7 years</Badge>
+            <Badge variant="outline">290 Qs</Badge>
+            <Badge variant="outline">Solo & 1 vs N</Badge>
+            <Badge variant="outline">Realtime</Badge>
+          </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem", marginBottom: "2rem" }}>
-          <Link href="/test" style={{ background: "linear-gradient(135deg,#1e40af,#3b82f6)", borderRadius: 16, padding: "1.5rem", textAlign: "center", boxShadow: "0 10px 30px rgba(59,130,246,0.3)" }}>
-            <div style={{ fontSize: "2rem" }}>🎯</div>
-            <h2 style={{ fontSize: "1.1rem", fontWeight: 800, margin: "0.5rem 0", color: "#fff" }}>Practice</h2>
-            <p style={{ color: "#dbeafe", fontSize: "0.85rem" }}>Random Qs · Instant scoring</p>
-            <div style={{ marginTop: "0.75rem", display: "inline-block", padding: "0.4rem 1rem", background: "#fff", color: "#1e40af", borderRadius: 20, fontWeight: 700, fontSize: "0.8rem" }}>Start →</div>
-          </Link>
+        {/* Primary actions — Practice / Create / Join */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-blue-600 to-cyan-500 text-white shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all">
+            <CardHeader className="pb-2">
+              <div className="text-3xl">🎯</div>
+              <CardTitle className="text-white">Practice</CardTitle>
+              <CardDescription className="text-blue-100">Random Qs · Instant scoring · History</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link href="/test"><Button variant="secondary" className="w-full bg-white text-blue-600 hover:bg-white/90">Start Practice →</Button></Link>
+            </CardContent>
+            <div className="absolute -right-6 -bottom-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+          </Card>
 
-          <Link href="/rooms?create=1" style={{ background: "linear-gradient(135deg,#059669,#10b981)", borderRadius: 16, padding: "1.5rem", textAlign: "center", boxShadow: "0 10px 30px rgba(16,185,129,0.3)" }}>
-            <div style={{ fontSize: "2rem" }}>➕</div>
-            <h2 style={{ fontSize: "1.1rem", fontWeight: 800, margin: "0.5rem 0", color: "#fff" }}>Create Room</h2>
-            <p style={{ color: "#d1fae5", fontSize: "0.85rem" }}>Host a battle · Share code</p>
-            <div style={{ marginTop: "0.75rem", display: "inline-block", padding: "0.4rem 1rem", background: "#fff", color: "#059669", borderRadius: 20, fontWeight: 700, fontSize: "0.8rem" }}>Create →</div>
-          </Link>
+          <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-emerald-600 to-teal-500 text-white shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all">
+            <CardHeader className="pb-2">
+              <div className="text-3xl">➕</div>
+              <CardTitle className="text-white">Create Room</CardTitle>
+              <CardDescription className="text-emerald-100">Host a battle · Share 6-char code</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link href="/rooms"><Button variant="secondary" className="w-full bg-white text-emerald-600 hover:bg-white/90">Create Room →</Button></Link>
+            </CardContent>
+            <div className="absolute -right-6 -bottom-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+          </Card>
 
-          <Link href="/rooms?join=1" style={{ background: "linear-gradient(135deg,#7e22ce,#ec4899)", borderRadius: 16, padding: "1.5rem", textAlign: "center", boxShadow: "0 10px 30px rgba(236,72,153,0.3)" }}>
-            <div style={{ fontSize: "2rem" }}>🚪</div>
-            <h2 style={{ fontSize: "1.1rem", fontWeight: 800, margin: "0.5rem 0", color: "#fff" }}>Join Room</h2>
-            <p style={{ color: "#fce7f3", fontSize: "0.85rem" }}>Enter code · Compete live</p>
-            <div style={{ marginTop: "0.75rem", display: "inline-block", padding: "0.4rem 1rem", background: "#fff", color: "#7e22ce", borderRadius: 20, fontWeight: 700, fontSize: "0.8rem" }}>Join →</div>
-          </Link>
+          <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-violet-600 to-pink-500 text-white shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all">
+            <CardHeader className="pb-2">
+              <div className="text-3xl">🚪</div>
+              <CardTitle className="text-white">Join Room</CardTitle>
+              <CardDescription className="text-pink-100">Enter code · Compete live</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link href="/rooms"><Button variant="secondary" className="w-full bg-white text-violet-600 hover:bg-white/90">Join Room →</Button></Link>
+            </CardContent>
+            <div className="absolute -right-6 -bottom-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+          </Card>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "1rem", marginBottom: "2rem" }}>
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-3 mb-8">
           {[
-            { label: "Questions", value: "290+", sub: "7 years" },
-            { label: "Accuracy", value: "Live", sub: "Realtime scoring" },
-            { label: "Mode", value: "1 vs N", sub: "Solo & Multiplayer" },
+            { k: "Questions", v: "290+", d: "Approved · 7 yrs" },
+            { k: "Modes", v: "Solo & Battle", d: "Practice or 1 vs N" },
+            { k: "Realtime", v: "Live", d: "Timer + Leaderboard" },
           ].map((s) => (
-            <div key={s.label} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, padding: "1rem", textAlign: "center", backdropFilter: "blur(10px)" }}>
-              <div style={{ fontSize: "1.5rem", fontWeight: 800, color: "#fff" }}>{s.value}</div>
-              <div style={{ fontSize: "0.75rem", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.1em" }}>{s.label}</div>
-              <div style={{ fontSize: "0.7rem", color: "#64748b" }}>{s.sub}</div>
-            </div>
+            <Card key={s.k} className="glass text-center">
+              <CardContent className="pt-6">
+                <div className="text-xl font-black">{s.v}</div>
+                <div className="text-xs uppercase tracking-widest text-muted-foreground">{s.k}</div>
+                <div className="text-xs text-muted-foreground/70">{s.d}</div>
+              </CardContent>
+            </Card>
           ))}
         </div>
 
-        <nav style={{ display: "flex", justifyContent: "center", gap: "1.5rem", color: "#64748b", fontSize: "0.85rem" }}>
-          <Link href="/test/history" style={{ color: "#94a3b8" }}>📊 History</Link>
-          <Link href="/admin/login" style={{ color: "#94a3b8" }}>🔧 Admin</Link>
-          <a href="https://ceed-592143120374.asia-south1.run.app" style={{ color: "#94a3b8" }}>Cloud Run</a>
-        </nav>
+        {/* How it works */}
+        <Card>
+          <CardHeader>
+            <CardTitle>How it works</CardTitle>
+            <CardDescription>Solo practice or realtime battle — same question bank.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid sm:grid-cols-3 gap-4 text-sm">
+            <div className="rounded-lg border p-4">
+              <div className="font-semibold mb-1">1. Practice</div>
+              <p className="text-muted-foreground">Pick 5–30 Qs. Filtered to only usable Qs (with options/images). Images show with loader.</p>
+            </div>
+            <div className="rounded-lg border p-4">
+              <div className="font-semibold mb-1">2. Battle Room</div>
+              <p className="text-muted-foreground">Create → share 6-char code → friends join → host starts → same timer for all.</p>
+            </div>
+            <div className="rounded-lg border p-4">
+              <div className="font-semibold mb-1">3. Results</div>
+              <p className="text-muted-foreground">Instant scoring, leaderboard 🥇🥈🥉, and history.</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="mt-8 flex flex-wrap justify-center gap-3 text-sm">
+          <Link href="/test/history"><Button variant="outline">📊 History</Button></Link>
+          <Link href="/admin/login"><Button variant="ghost">🔧 Admin</Button></Link>
+        </div>
       </div>
-    </main>
+    </div>
   );
 }
